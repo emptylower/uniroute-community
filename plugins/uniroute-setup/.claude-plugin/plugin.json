@@ -1,0 +1,13 @@
+{
+  "name": "uniroute-setup",
+  "version": "0.1.0",
+  "description": "Configure AI clients for UniRoute using the authenticated model catalog.",
+  "author": {
+    "name": "UniRoute",
+    "url": "https://all-model-router.app"
+  },
+  "homepage": "https://all-model-router.app/zh/docs/uniroute-skill",
+  "repository": "https://github.com/emptylower/uniroute-community",
+  "license": "MIT",
+  "keywords": ["uniroute", "configuration", "models"]
+}

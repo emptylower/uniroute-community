@@ -1,0 +1,39 @@
+name: Community CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  community-checks:
+    name: community-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Install package dependencies
+        run: |
+          npm ci --ignore-scripts --prefix packages/uniroute-setup
+          npm ci --ignore-scripts --prefix packages/openclaw-uniroute-auth
+      - name: Build community release artifacts
+        run: npm run build
+      - name: Run component tests
+        run: npm test
+      - name: Validate Claude marketplace when the CLI is available
+        shell: bash
+        run: |
+          if command -v claude >/dev/null 2>&1; then
+            export CLAUDE_CONFIG_DIR="${RUNNER_TEMP}/uniroute-claude-validation"
+            claude plugin validate . --strict --json
+            claude plugin validate plugins/uniroute-setup --strict --json
+          else
+            echo "::notice::Claude CLI is unavailable; marketplace CLI validation was skipped. Build and component tests remain required."
+          fi

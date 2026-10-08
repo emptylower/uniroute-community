@@ -1,0 +1,23 @@
+{
+  "name": "openclaw-uniroute-auth",
+  "version": "0.1.0",
+  "description": "UniRoute API-key authentication and live model catalog for OpenClaw",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "files": ["dist", "openclaw.plugin.json", "README.md", "LICENSE"],
+  "engines": { "node": ">=24.16.0 <25 || >=26.1.0" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": { "esbuild": "0.28.2", "openclaw": "2026.9.8" },
+  "peerDependencies": { "openclaw": "2026.9.8" },
+  "peerDependenciesMeta": { "openclaw": { "optional": true } },
+  "openclaw": {
+    "extensions": ["./dist/index.js"],
+    "providers": ["uniroute", "uniroute-anthropic", "uniroute-openai-responses", "uniroute-openai-chat", "uniroute-gemini"],
+    "compat": { "pluginApi": "2026.9.8", "minGatewayVersion": "2026.9.8" },
+    "build": { "openclawVersion": "2026.9.8", "pluginSdkVersion": "2026.9.8" }
+  }
+}

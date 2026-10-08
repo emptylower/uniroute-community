@@ -1,0 +1,31 @@
+{
+  "id": "openclaw-uniroute-auth",
+  "name": "UniRoute",
+  "version": "0.1.0",
+  "description": "API-key auth and authenticated live model discovery for UniRoute",
+  "providers": ["uniroute", "uniroute-anthropic", "uniroute-openai-responses", "uniroute-openai-chat", "uniroute-gemini"],
+  "setup": { "providers": [{ "id": "uniroute", "envVars": ["UNIROUTE_API_KEY"] }] },
+  "providerAuthAliases": {
+    "uniroute-anthropic": "uniroute",
+    "uniroute-openai-responses": "uniroute",
+    "uniroute-openai-chat": "uniroute",
+    "uniroute-gemini": "uniroute"
+  },
+  "providerAuthChoices": [{
+    "provider": "uniroute", "method": "api-key", "choiceId": "uniroute-api-key",
+    "choiceLabel": "UniRoute API key", "groupId": "uniroute", "groupLabel": "UniRoute",
+    "optionKey": "unirouteApiKey", "cliFlag": "--uniroute-api-key",
+    "cliOption": "--uniroute-api-key <key>", "cliDescription": "UniRoute API key"
+  }],
+  "configSchema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "baseUrl": { "type": "string" },
+      "timeoutMs": { "type": "integer", "minimum": 1, "maximum": 120000 },
+      "modelProtocols": {
+        "type": "object",
+        "additionalProperties": { "enum": ["anthropic", "openai-responses", "openai-chat", "gemini"] }
+      }
+    }
+  }
+}

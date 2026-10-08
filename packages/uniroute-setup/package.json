@@ -1,0 +1,13 @@
+{
+  "name": "uniroute-setup",
+  "version": "0.1.0",
+  "description": "Configure supported AI clients against your authenticated UniRoute model catalog",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "bin": { "uniroute-setup": "src/cli.js" },
+  "exports": { ".": "./src/catalog.js", "./configure": "./src/configure.js" },
+  "files": ["src", "README.md"],
+  "scripts": { "test": "node --test", "check": "node --check src/cli.js && node --check src/catalog.js && node --check src/configure.js && node --check src/files.js" },
+  "dependencies": { "json5": "^2.2.3", "jsonc-parser": "^3.3.1", "smol-toml": "^1.4.2", "yaml": "^2.8.1" }
+}

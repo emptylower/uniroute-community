@@ -1,0 +1,4 @@
+interface:
+  display_name: "UniRoute Setup"
+  short_description: "Connect AI clients to UniRoute using a live model catalog"
+  default_prompt: "Use $uniroute-setup to preview and configure my AI client for UniRoute."

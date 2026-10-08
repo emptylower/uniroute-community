@@ -1,0 +1,14 @@
+{
+  "name": "uniroute-community",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.16.0"
+  },
+  "scripts": {
+    "build": "node scripts/build-community.mjs",
+    "test": "node --test packages/uniroute-setup/test/*.test.js packages/openclaw-uniroute-auth/test/*.test.js"
+  }
+}
