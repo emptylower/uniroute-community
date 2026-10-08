@@ -51,6 +51,12 @@ try {
     })
   );
   const version = metadata[0].version;
+  const openclawManifest = JSON.parse(
+    await readFile(
+      join(communityRoot, 'packages', 'openclaw-uniroute-auth', 'openclaw.plugin.json'),
+      'utf8'
+    )
+  );
   const marketplace = JSON.parse(
     await readFile(
       join(communityRoot, '.claude-plugin', 'marketplace.json'),
@@ -71,6 +77,7 @@ try {
   );
   if (
     metadata.some((item) => item.version !== version) ||
+    openclawManifest.version !== version ||
     pluginManifest.version !== version ||
     marketplace.plugins.find((item) => item.name === 'uniroute-setup')
       ?.version !== version

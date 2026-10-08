@@ -14,15 +14,15 @@ Use the UniRoute configuration CLI to query the model catalog visible to the cur
 3. Query the catalog:
 
    ```sh
-   npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.0.tgz uniroute-setup models
+   npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.1.tgz uniroute-setup models
    ```
 
    Use complete model IDs from this response. Catalog discovery is configuration input, not evidence that an inference call succeeded. Do not invent IDs, capabilities, prices, context limits, or availability. On authentication, permission, network, or catalog errors, report the error and resolve it before writing configuration. An unknown model family requires a confirmed protocol via `--protocol`.
 4. Preview the requested change, then apply it within the user's existing authorization:
 
    ```sh
-   npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.0.tgz uniroute-setup configure CLIENT --model MODEL_ID --dry-run
-   npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.0.tgz uniroute-setup configure CLIENT --model MODEL_ID
+   npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.1.tgz uniroute-setup configure CLIENT --model MODEL_ID --dry-run
+   npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.1.tgz uniroute-setup configure CLIENT --model MODEL_ID
    ```
 
    Replace `CLIENT` with `claude`, `codex`, `gemini`, `opencode`, `openclaw`, or `hermes`. The CLI backs up changed files, preserves unrelated configuration, and avoids rewriting identical configuration. Keep backup locations in the completion report. Use the same credential source and home directory for preview and application.

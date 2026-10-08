@@ -356,3 +356,41 @@ test('Windows does not rewrite unchanged config solely for POSIX mode bits', asy
   } finally { Object.defineProperty(process, 'platform', platform); }
   assert.deepEqual(await fs.readdir(path.join(f.home, '.claude')), ['settings.json']);
 });
+
+test('npm/npx-style bin symlink runs help and authenticated commands instead of exiting silently', async t => {
+  const f = await fixture(t);
+  const bin = path.join(f.home, 'node_modules/.bin/uniroute-setup');
+  await fs.mkdir(path.dirname(bin), { recursive: true });
+  await fs.symlink(path.join(import.meta.dirname, '../src/cli.js'), bin);
+  async function invoke(args) {
+    const child = spawn(process.execPath, [bin, ...args], { cwd: f.home, env: { ...process.env, UNIROUTE_API_KEY: key } });
+    let output = '', errors = '';
+    child.stdout.on('data', chunk => { output += chunk; });
+    child.stderr.on('data', chunk => { errors += chunk; });
+    const code = await new Promise(resolve => child.once('close', resolve));
+    assert.equal(code, 0, errors);
+    return output;
+  }
+  assert.match(await invoke(['--help']), /uniroute-setup configure/);
+  const output = await invoke(['models', '--base-url', f.baseUrl, '--json']);
+  assert.equal(JSON.parse(output)[0].id, 'claude-sonnet-test');
+  assert.equal(f.requests.length, 1);
+  assert.ok(!output.includes(key));
+});
+
+test('macOS /var alias plus npm bin symlink still executes the CLI', { skip: process.platform !== 'darwin' }, async t => {
+  const temporary = await fs.mkdtemp(path.join(await fs.realpath('/var/tmp'), 'uniroute-bin-alias-test-'));
+  t.after(() => fs.rm(temporary, { recursive: true, force: true }));
+  assert.match(temporary, /^\/private\/var\//, 'macOS temporary root should expose the /var alias for this regression');
+  const bin = path.join(temporary, 'node_modules/.bin/uniroute-setup');
+  await fs.mkdir(path.dirname(bin), { recursive: true });
+  await fs.symlink(path.join(import.meta.dirname, '../src/cli.js'), bin);
+  const alias = bin.replace(/^\/private\/var\//, '/var/');
+  const child = spawn(process.execPath, [alias, '--help'], { cwd: temporary, env: process.env });
+  let output = '', errors = '';
+  child.stdout.on('data', chunk => { output += chunk; });
+  child.stderr.on('data', chunk => { errors += chunk; });
+  const code = await new Promise(resolve => child.once('close', resolve));
+  assert.equal(code, 0, errors);
+  assert.match(output, /Supply the key via UNIROUTE_API_KEY/);
+});

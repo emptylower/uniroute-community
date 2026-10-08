@@ -9,7 +9,7 @@
       "name": "uniroute-setup",
       "source": "./plugins/uniroute-setup",
       "description": "Configure AI clients for UniRoute using the authenticated model catalog.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ],
   "description": "UniRoute configuration skills and community integrations for AI clients."
