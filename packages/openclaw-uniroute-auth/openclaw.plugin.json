@@ -1,7 +1,7 @@
 {
   "id": "openclaw-uniroute-auth",
   "name": "UniRoute",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "API-key auth and authenticated live model discovery for UniRoute",
   "providers": ["uniroute", "uniroute-anthropic", "uniroute-openai-responses", "uniroute-openai-chat", "uniroute-gemini"],
   "setup": { "providers": [{ "id": "uniroute", "envVars": ["UNIROUTE_API_KEY"] }] },

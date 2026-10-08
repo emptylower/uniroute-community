@@ -1,6 +1,6 @@
 {
   "name": "openclaw-uniroute-auth",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "UniRoute API-key authentication and live model catalog for OpenClaw",
   "type": "module",
   "license": "MIT",

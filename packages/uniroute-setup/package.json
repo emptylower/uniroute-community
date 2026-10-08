@@ -1,6 +1,6 @@
 {
   "name": "uniroute-setup",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Configure supported AI clients against your authenticated UniRoute model catalog",
   "type": "module",
   "license": "MIT",

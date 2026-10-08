@@ -11,8 +11,8 @@ are not yet verified. It delegates inference to OpenClaw's native transports.
 Until the package is published to npm, use the downloadable release tarball:
 
 ```sh
-curl -fL https://all-model-router.app/community/openclaw-uniroute-auth-0.1.1.tgz -o openclaw-uniroute-auth-0.1.1.tgz
-openclaw plugins install ./openclaw-uniroute-auth-0.1.1.tgz
+curl -fL https://all-model-router.app/community/openclaw-uniroute-auth-0.1.2.tgz -o openclaw-uniroute-auth-0.1.2.tgz
+openclaw plugins install ./openclaw-uniroute-auth-0.1.2.tgz
 openclaw models auth login --provider uniroute --method api-key
 openclaw models list --all --provider uniroute-openai-responses --refresh
 ```

@@ -46,28 +46,61 @@ export function parseArgs(args) {
 
 async function maskedKeyPrompt(input, output) {
   if (!input.isTTY || !output.isTTY || typeof input.setRawMode !== 'function') throw new Error('Set UNIROUTE_API_KEY or --key-file in noninteractive environments.');
-  output.write('UniRoute API key (hidden): ');
   return new Promise((resolve, reject) => {
     let value = '';
-    const previousRaw = input.isRaw;
-    input.setRawMode(true);
-    input.resume();
-    function finish(error) {
+    let settled = false;
+    const previousRaw = Boolean(input.isRaw);
+    function finish(error, skipNewline = false) {
+      if (settled) return;
+      settled = true;
       input.off('data', onData);
-      input.setRawMode(Boolean(previousRaw));
-      input.pause();
-      output.write('\n');
-      if (error) reject(error); else resolve(value);
-    }
-    function onData(chunk) {
-      for (const character of chunk.toString('utf8')) {
-        if (character === '\r' || character === '\n') { finish(); return; }
-        if (character === '\u0003' || character === '\u0004') { finish(new Error('Setup cancelled.')); return; }
-        if (character === '\u007f' || character === '\b') value = value.slice(0, -1);
-        else if (character >= ' ') value += character;
+      input.off('error', onInputError);
+      input.off('end', onEnd);
+      process.off('SIGINT', onSignal);
+      process.off('SIGTERM', onSignal);
+      try { input.setRawMode(previousRaw); input.pause(); }
+      catch { error = new Error('Cannot restore terminal input mode.'); }
+      function complete(writeError) {
+        // Writable errors also emit an error event after their callback; leave
+        // the one-time handler attached until that event has been handled.
+        if (!writeError) output.off('error', onOutputError);
+        if (error || writeError) reject(error || new Error('Cannot write terminal output.'));
+        else resolve(value);
       }
+      if (skipNewline) { complete(); return; }
+      try { output.write('\n', complete); }
+      catch { output.off('error', onOutputError); reject(error || new Error('Cannot write terminal output.')); }
+    }
+    function onInputError() { finish(new Error('Cannot read API key from the terminal.')); }
+    function onOutputError() {
+      const error = new Error('Cannot write terminal output.');
+      if (settled) reject(error); else finish(error, true);
+    }
+    function onEnd() { finish(new Error('Input closed before an API key was provided.')); }
+    function onSignal() { finish(new Error('Setup cancelled.')); }
+    function onData(chunk) {
+      try {
+        for (const character of chunk.toString('utf8')) {
+          if (character === '\r' || character === '\n') { finish(); return; }
+          if (character === '\u0003' || character === '\u0004') { finish(new Error('Setup cancelled.')); return; }
+          if (character === '\u007f' || character === '\b') value = value.slice(0, -1);
+          else if (character >= ' ') value += character;
+        }
+      } catch { onInputError(); }
     }
     input.on('data', onData);
+    input.once('error', onInputError);
+    input.once('end', onEnd);
+    output.once('error', onOutputError);
+    process.once('SIGINT', onSignal);
+    process.once('SIGTERM', onSignal);
+    try {
+      input.setRawMode(true);
+      input.resume();
+      // Input handlers and terminal no-echo mode must be ready before the user
+      // can see the prompt and immediately paste a key.
+      if (!settled) output.write('UniRoute API key (hidden): ');
+    } catch { finish(new Error('Cannot initialize the hidden terminal prompt.'), true); }
   });
 }
 

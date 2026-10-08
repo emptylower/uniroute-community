@@ -5,6 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import http from 'node:http';
 import { spawn } from 'node:child_process';
+import { EventEmitter } from 'node:events';
 import { parse as parseToml } from 'smol-toml';
 import { parse as parseJsonc } from 'jsonc-parser';
 import JSON5 from 'json5';
@@ -393,4 +394,71 @@ test('macOS /var alias plus npm bin symlink still executes the CLI', { skip: pro
   const code = await new Promise(resolve => child.once('close', resolve));
   assert.equal(code, 0, errors);
   assert.match(output, /Supply the key via UNIROUTE_API_KEY/);
+});
+
+test('hidden prompt is ready for immediate input and restores terminal on errors', async t => {
+  const f = await fixture(t);
+  for (const mode of ['paste', 'cancel', 'input error', 'input end', 'output error', 'initialize error', 'newline error']) {
+    const input = new EventEmitter();
+    const output = new EventEmitter();
+    input.isTTY = output.isTTY = true;
+    input.isRaw = false;
+    const rawCalls = [];
+    input.setRawMode = value => { input.isRaw = value; rawCalls.push(value); };
+    input.resume = () => {};
+    input.pause = () => {};
+    const signalCounts = ['SIGINT', 'SIGTERM'].map(signal => process.listenerCount(signal));
+    output.write = (text, callback) => {
+      if (text.includes('API key')) {
+        assert.equal(input.isRaw, true, 'no-echo mode must precede prompt output');
+        assert.equal(input.listenerCount('data'), 1, 'data listener must precede prompt output');
+        if (mode === 'initialize error') throw new Error('Synthetic private output failure');
+        if (mode === 'output error') { queueMicrotask(() => output.emit('error', new Error('Synthetic output error'))); return; }
+        if (mode === 'input error') { input.emit('error', new Error('Synthetic input error')); return; }
+        if (mode === 'input end') { input.emit('end'); return; }
+        input.emit('data', Buffer.from(mode === 'cancel' ? '\u0003' : `${key}\n`));
+      } else if (callback) queueMicrotask(() => {
+        if (mode === 'newline error') {
+          callback(new Error('Synthetic output failure'));
+          output.emit('error', new Error('Synthetic output failure'));
+        } else callback();
+      });
+    };
+    const operation = run(['models', '--base-url', f.baseUrl], { env: {}, input, output });
+    if (mode === 'paste') await operation;
+    else await assert.rejects(operation);
+    assert.equal(input.isRaw, false, `${mode}: terminal raw state restored`);
+    assert.deepEqual(rawCalls, [true, false]);
+    assert.equal(input.listenerCount('data'), 0);
+    assert.equal(input.listenerCount('error'), 0);
+    assert.equal(input.listenerCount('end'), 0);
+    assert.equal(output.listenerCount('error'), 0);
+    assert.deepEqual(['SIGINT', 'SIGTERM'].map(signal => process.listenerCount(signal)), signalCounts);
+  }
+});
+
+test('real PTY immediate paste, Ctrl-C and SIGTERM keep keys hidden and restore termios', { skip: process.platform === 'win32' }, async t => {
+  const f = await fixture(t);
+  for (const mode of ['paste', 'cancel', 'signal']) {
+    const child = spawn('python3', [path.join(import.meta.dirname, 'pty_prompt.py'), process.execPath,
+      path.join(import.meta.dirname, '../src/cli.js'), f.baseUrl, mode], { cwd: f.home });
+    let output = '', errors = '';
+    child.stdout.on('data', chunk => { output += chunk; });
+    child.stderr.on('data', chunk => { errors += chunk; });
+    const code = await new Promise(resolve => child.once('close', resolve));
+    assert.equal(code, 0, errors);
+    const result = JSON.parse(output);
+    assert.equal(result.prompt_seen, true, mode);
+    assert.equal(result.no_echo_at_prompt, true, mode);
+    assert.equal(result.key_not_echoed, true, mode);
+    assert.equal(result.terminal_restored, true, mode);
+    if (mode === 'paste') {
+      assert.equal(result.exit_code, 0);
+      assert.equal(result.catalog_returned, true);
+    } else {
+      assert.equal(result.exit_code, 1);
+      assert.equal(result.cancelled, true);
+    }
+  }
+  assert.equal(f.requests.length, 1, 'cancelled prompts must not call the gateway');
 });

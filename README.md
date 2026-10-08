@@ -13,9 +13,9 @@ Community configuration components for the UniRoute gateway. These components co
 Node.js 22+ is required. The release is distributed as a versioned archive from the UniRoute website:
 
 ```sh
-npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.1.tgz uniroute-setup models
-npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.1.tgz uniroute-setup configure codex --model MODEL_ID --dry-run
-npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.1.tgz uniroute-setup configure codex --model MODEL_ID
+npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.2.tgz uniroute-setup models
+npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.2.tgz uniroute-setup configure codex --model MODEL_ID --dry-run
+npx --yes --package=https://all-model-router.app/community/uniroute-setup-0.1.2.tgz uniroute-setup configure codex --model MODEL_ID
 ```
 
 Replace `MODEL_ID` with an ID returned by your API-key catalog. The CLI prompts for the API key without echoing it. Automation can use `UNIROUTE_API_KEY` or `--key-file /path/to/private-file`. Do not pass credentials as arguments or paste them into an AI conversation. Changed configuration files are backed up, and unrelated settings are retained. `--home /absolute/test-home` supports isolated configuration trials.
@@ -29,15 +29,15 @@ In Claude Code:
 /plugin install uniroute-setup@uniroute-marketplace
 ```
 
-The marketplace contains the configuration Skill, which guides the agent through the same CLI. The canonical source is `.claude/skills/uniroute-setup`; the build generates its marketplace copy under `plugins/uniroute-setup/skills/uniroute-setup`. For Codex, install the [Skill ZIP](https://all-model-router.app/community/uniroute-setup-skill-0.1.1.zip) in `.agents/skills/uniroute-setup` and invoke `$uniroute-setup`.
+The marketplace contains the configuration Skill, which guides the agent through the same CLI. The canonical source is `.claude/skills/uniroute-setup`; the build generates its marketplace copy under `plugins/uniroute-setup/skills/uniroute-setup`. For Codex, install the [Skill ZIP](https://all-model-router.app/community/uniroute-setup-skill-0.1.2.zip) in `.agents/skills/uniroute-setup` and invoke `$uniroute-setup`.
 
 ## Install the OpenClaw plugin
 
 The plugin is tested against OpenClaw `2026.9.8`. Follow that client's Node.js requirements: Node 24.16+ on 24.x, or 26.1+.
 
 ```sh
-curl -fL https://all-model-router.app/community/openclaw-uniroute-auth-0.1.1.tgz -o openclaw-uniroute-auth-0.1.1.tgz
-openclaw plugins install ./openclaw-uniroute-auth-0.1.1.tgz
+curl -fL https://all-model-router.app/community/openclaw-uniroute-auth-0.1.2.tgz -o openclaw-uniroute-auth-0.1.2.tgz
+openclaw plugins install ./openclaw-uniroute-auth-0.1.2.tgz
 openclaw models auth login --provider uniroute --method api-key
 ```
 
